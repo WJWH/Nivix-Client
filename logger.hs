@@ -1,8 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
 import Adclezer
 import WaitForConnection
 
+import qualified Data.ByteString.Lazy.Char8 as BSL
 import Network.HTTP.Conduit
 import System.RaspberryPi.GPIO
+import Network.HTTP.Types.Method
 
 
 main = withGPIO . withSPI $ do --setup some things
@@ -18,9 +21,10 @@ main = withGPIO . withSPI $ do --setup some things
     
 --Posts een request naar Nivix
 postToNivix :: Event -> IO Bool
-postToNivix evt = handle (\(e :: HttpException) -> return false) $ do --als het faalt, dan sowieso weer gaan slapen
+postToNivix evt = handle (\(e :: HttpException) -> return False) $ do --als het faalt, dan sowieso weer gaan slapen
     req <- makePostRequest $ encode evt
-    Response bs <- withManager $ \manager -> httpLbs req manager
+    manager <- newManager tlsManagerSettings
+    Response bs <- httpLbs req manager
     return $ bs == "stayalive"
 
 --parseURL werkt in een monad m die in de failure class zit, een voorbeeld van die class is good old Maybe.
@@ -36,6 +40,6 @@ shutdown = do
     if preventShutdown then return () else spawnCommand "sudo shutdown -h now"
     
 --aeson werkt niet op de pi omdat je geen TH kan gebruiken. dit is natuurlijk een nogal brakke vervanger, maar je moet wat...
-encode (STUW bat temp) = BSL.concat ["{\"tag\":\"STUW\",\"contents\":[", BSL.pack . show $ bat, ",", BSL.pack . show $ temp, "]}\""]
+encode (STUW _ temp) = BSL.concat ["{\"tag\":\"STUW\",\"contents\":[", "100", ",", BSL.pack . show $ temp, "]}\""]
 
 data Event = STUW Double Double
