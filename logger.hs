@@ -39,7 +39,7 @@ shutdown = do
     setPinFunction Pin11 Input
     preventShutdown <- readPin Pin11 --voor debuggen is het handig om ook als er geen server is de pi te laten leven
     -- let preventShutdown = True
-    if preventShutdown then return () else ((spawnCommand "sudo shutdown -h now") >> return ())
+    if preventShutdown then return () else ((createProcess $ shell "sudo shutdown -h now") >> return ())
     
 --aeson werkt niet op de pi omdat je geen TH kan gebruiken. dit is natuurlijk een nogal brakke vervanger, maar je moet wat...
 encode (STUW _ temp) = BSL.concat ["{\"tag\":\"STUW\",\"contents\":[", "100", ",", BSL.pack . show $ temp, "]}\""]
