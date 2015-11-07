@@ -8,8 +8,8 @@ import Debug.Trace
 
 --idee: interfacen met de A/D converter
 
-doMeasurement :: IO Double --leest de thermistor en geeft de waarde terug
-doMeasurement = do
+readTemperature :: IO Double --leest de thermistor en geeft de waarde terug
+readTemperature = do
     results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,128,0]) -- doe het vijf keer
     return . (myRound 1) . average . (map extractResults) $ results
     

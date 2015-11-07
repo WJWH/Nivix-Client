@@ -1,11 +1,13 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 import Adclezer
 import WaitForConnection
 
+import Control.Exception
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import Network.HTTP.Conduit
 import System.RaspberryPi.GPIO
 import Network.HTTP.Types.Method
+import System.Process
 
 
 main = withGPIO . withSPI $ do --setup some things
@@ -21,7 +23,7 @@ main = withGPIO . withSPI $ do --setup some things
     
 --Posts een request naar Nivix
 postToNivix :: Event -> IO Bool
-postToNivix evt = handle (\(e :: HttpException) -> return False) $ do --als het faalt, dan sowieso weer gaan slapen
+postToNivix evt = Control.Exception.handle (\(e :: HttpException) -> return False) $ do --als het faalt, dan sowieso weer gaan slapen
     req <- makePostRequest $ encode evt
     manager <- newManager tlsManagerSettings
     Response bs <- httpLbs req manager
