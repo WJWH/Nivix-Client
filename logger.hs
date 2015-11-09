@@ -17,7 +17,7 @@ main = withGPIO . withSPI $ do --setup some things
     setChipSelectPolaritySPI CS0 False 
     setDataModeSPI (False,False) 
     waitForConnection
-    battery <- return 100 --readBattery
+    battery <- readBattery
     temperature <- readTemperature
     shouldStayAlive <- postToNivix $ STUW battery temperature
     if shouldStayAlive then return () else shutdown
