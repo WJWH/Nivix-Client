@@ -44,6 +44,6 @@ shutdown = do
     if preventShutdown then return () else (writePin Pin15 False >> (createProcess $ shell "sudo shutdown -h now") >> return ())
     
 --aeson werkt niet op de pi omdat je geen TH kan gebruiken. dit is natuurlijk een nogal brakke vervanger, maar je moet wat...
-encode (STUW bat temp) = BSL.concat ["{\"tag\":\"STUW\",\"contents\":[", BSL.pack . show $ bat, ",", BSL.pack . show $ temp, "]}\""]
+encode (STUW bat temp) = BSL.concat ["{\"tag\":\"STUW\",\"contents\":[", BSL.pack . show $ bat, ",", BSL.pack . show $ temp, "]}"]
 
 data Event = STUW Double Double
