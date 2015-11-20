@@ -1,16 +1,17 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 module WaitForConnection where
 
 import Control.Concurrent
-import qualified Control.Exception as CE
-import Network.HTTP.Conduit
+import System.Exit
+import System.Process
 import System.Time
-
---doet precies wat het zegt
-testConnection :: IO Bool
-testConnection = do
-    (simpleHttp "https://www.google.com" >> return True) `CE.catch` (\(e :: HttpException) -> return False) --TODO: simpleHttp is super wasteful, een ping method zou beter zijn
     
+--pingt google in a blocking way, ping geeft een ExitSuccess als de host bereikbaar was met alle pings, anders een false.
+testConnection = do
+    -- -n 1 zorgt er voor dat hij maar één request doet, dit douurt obviously veel korter dan vier met steeds een seconde ertussen
+    (exitcode,_,_) <- readProcessWithExitCode "ping" ["www.google.com", "-n", "1"] [] 
+    return $ exitcode == ExitSuccess
+
 -- worker method
 waitForConnection' :: IO ()
 waitForConnection' = do
