@@ -9,7 +9,7 @@ import System.Time
 --pingt google in a blocking way, ping geeft een ExitSuccess als de host bereikbaar was met alle pings, anders een false.
 testConnection = do
     -- -n 1 zorgt er voor dat hij maar één request doet, dit douurt obviously veel korter dan vier met steeds een seconde ertussen
-    (exitcode,_,_) <- readProcessWithExitCode "ping" ["www.google.com", "-n", "1"] [] 
+    (exitcode,_,_) <- readProcessWithExitCode "ping" ["www.google.com", "-c", "1"] [] --snekkie! op windows is één pakket -n, op linux -c
     return $ exitcode == ExitSuccess
 
 -- worker method
