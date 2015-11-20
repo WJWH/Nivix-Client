@@ -18,8 +18,9 @@ readBattery = do
     writePin Pin13 True --zet de spanningsdeler aan
     threadDelay 5000 --wacht een paar milliseconden om de spannings laten stabiliseren (nodig????)
     results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,144,0]) -- doe het vijf keer
-    return . (myRound 2) . average . (map extractBatteryResults) $ results
     writePin Pin13 False --zet de spanningsdeler weer uit om stroom te besparen
+    return . (myRound 2) . average . (map extractBatteryResults) $ results
+
     
 --de spanning van de batterij ligt ergens tussen drie en 4.2V?
 --de reference spanning van de ADC is maar 3.3V, dus een spanningsdeler van 2 10kOhm weerstanden haalt de spanning ver genoeg naar beneden om goed te meten.
