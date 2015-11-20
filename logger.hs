@@ -11,12 +11,14 @@ import System.Process
 
 
 main = withGPIO . withSPI $ do --setup some things
-    setPinFunction Pin15 Output
-    writePin Pin15 True
+    setPinFunction Pin15 Output --gaat naar de input van de ATTINY om aan te geven dat de pi aan staat
+    setPinFunction Pin13 Output --control pin van de spanningsdeler
+    setPinFunction Pin11 Input  --sensing pin om hardwarematig toch aan te blijven als de server geen keepalives geeft (bijv omdat hij uit staat)
+    writePin Pin15 True --signaal naar de ATTINY dat de pi draait
     chipSelectSPI CS0   --set the Chip select pin to the CS0 pin
     setChipSelectPolaritySPI CS0 False 
     setDataModeSPI (False,False) 
-    waitForConnection
+    waitForConnection --wacht tot de wifi- dan wel de 3G-verbinding werkt
     battery <- readBattery
     temperature <- readTemperature
     shouldStayAlive <- postToNivix $ STUW battery temperature
@@ -38,7 +40,6 @@ makePostRequest payload = initreq { method = methodPost , requestBody = RequestB
 --shuts down, tenzij pin11 hoog is.
 shutdown :: IO ()
 shutdown = do
-    setPinFunction Pin11 Input
     preventShutdown <- readPin Pin11 --voor debuggen is het handig om ook als er geen server is de pi te laten leven
     -- let preventShutdown = True
     if preventShutdown then return () else (writePin Pin15 False >> (createProcess $ shell "sudo shutdown -h now") >> return ())
