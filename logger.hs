@@ -12,7 +12,6 @@ import System.Process
 
 main = withGPIO . withSPI $ do --setup some things
     setPinFunction Pin15 Output --gaat naar de input van de ATTINY om aan te geven dat de pi aan staat
-    setPinFunction Pin13 Output --control pin van de spanningsdeler
     setPinFunction Pin11 Input  --sensing pin om hardwarematig toch aan te blijven als de server geen keepalives geeft (bijv omdat hij uit staat)
     writePin Pin15 True --signaal naar de ATTINY dat de pi draait
     chipSelectSPI CS0   --set the Chip select pin to the CS0 pin
@@ -35,7 +34,7 @@ postToNivix evt = Control.Exception.handle (\(e :: HttpException) -> return Fals
 --parseURL werkt in een monad m die in de failure class zit, een voorbeeld van die class is good old Maybe.
 makePostRequest :: BSL.ByteString -> Request
 makePostRequest payload = initreq { method = methodPost , requestBody = RequestBodyLBS payload } --encode geeft een lazy BS
-    where   (Just initreq) = parseUrl "http://192.168.178.20:3000" --poort 3000 op de laptop.
+    where   (Just initreq) = parseUrl "http://192.168.178.47:3000" --poort 3000 op de wired pi.
 
 --shuts down, tenzij pin11 hoog is.
 shutdown :: IO ()

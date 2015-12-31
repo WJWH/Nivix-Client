@@ -8,17 +8,15 @@ import Debug.Trace
 
 --idee: interfacen met de A/D converter
 
-readTemperature :: IO Double --leest de thermistor en geeft de waarde terug
+readTemperature :: IO Double --leest de thermistor en geeft de temperatuur terug
 readTemperature = do
     results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,128,0]) -- doe het vijf keer
     return . (myRound 1) . average . (map extractTemperatureResults) $ results
     
 readBattery :: IO Double --leest de spanning van de batterij
 readBattery = do
-    writePin Pin13 True --zet de spanningsdeler aan
     threadDelay 5000 --wacht een paar milliseconden om de spannings laten stabiliseren (nodig????)
     results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,144,0]) -- doe het vijf keer
-    writePin Pin13 False --zet de spanningsdeler weer uit om stroom te besparen
     return . (myRound 2) . average . (map extractBatteryResults) $ results
 
     
