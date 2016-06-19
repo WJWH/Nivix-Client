@@ -34,7 +34,7 @@ postToNivix evt = Control.Exception.handle (\(e :: HttpException) -> return Fals
 --parseURL werkt in een monad m die in de failure class zit, een voorbeeld van die class is good old Maybe.
 makePostRequest :: BSL.ByteString -> Request
 makePostRequest payload = initreq { method = methodPost , requestBody = RequestBodyLBS payload } --encode geeft een lazy BS
-    where   (Just initreq) = parseUrl "http://192.168.178.47:3000" --poort 3000 op de wired pi.
+    where   (Just initreq) = parseUrl "http://templogger.snokums.com" --templogger user op snokums
 
 --shuts down, tenzij pin11 hoog is.
 shutdown :: IO ()
