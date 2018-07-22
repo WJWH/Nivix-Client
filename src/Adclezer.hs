@@ -20,7 +20,7 @@ readBattery = do
     return . (myRound 2) . average . (map extractBatteryResults) $ results
 
 readRaw :: IO Double -- leest direct de spanning en rondt die af zodat je serverside er iets mee kan doen
-    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,144,0]) -- doe het vijf keer
+    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,128,0]) -- doe het vijf keer
     return . (myRound 2) . average $ results
 
 --de spanning van de batterij ligt ergens tussen drie en 4.2V?
