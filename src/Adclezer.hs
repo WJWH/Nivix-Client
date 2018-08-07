@@ -6,21 +6,29 @@ import Control.Concurrent
 import Data.Bits
 import Debug.Trace
 
---idee: interfacen met de A/D converter
+-- De A/D converter verwacht een serie bytes over de SPI bus als [1,x,0].
+-- De eerste 1 komt omdat het een 0x1 is die de MCP verwacht als startbit. Dan komt
+-- 1 bit die de single/differential meetmethode is, je wil vrijwel altijd single.
+-- De volgende 3 geeft aan welke pin je van wil meten, de laatste vier bits van de tweede
+-- byte zijn "don't care". Dan komen nog eens 8 "don't care" bits die nodig zijn om de
+-- clock pin op active te houden. Daarvoor gebruiken we 0 omdat het toch niet uitmaakt.
+-- Zie ook blz 21 van de MCP3008 datasheet
+
 
 readTemperature :: IO Double --leest de thermistor en geeft de temperatuur terug
 readTemperature = do
-    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,128,0]) -- doe het vijf keer
+    -- doe het vijf keer
+    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,128,0]) -- 128 = 128 + (pin 0 << 4)
     return . (myRound 1) . average . (map extractTemperatureResults) $ results
 
 readBattery :: IO Double --leest de spanning van de batterij
 readBattery = do
     threadDelay 5000 --wacht een paar milliseconden om de spannings laten stabiliseren (nodig????)
-    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,144,0]) -- doe het vijf keer
+    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,144,0]) -- 160 = 128 + 32 = 128 + (pin 1 << 4)
     return . (myRound 2) . average . (map extractBatteryResults) $ results
 
 readRaw :: IO Double -- leest direct de spanning en rondt die af zodat je serverside er iets mee kan doen
-    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,128,0]) -- doe het vijf keer
+    results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,160,0]) -- 160 = 128 + 32 = 128 + (pin 2 << 4)
     return . (myRound 2) . average $ results
 
 --de spanning van de batterij ligt ergens tussen drie en 4.2V?

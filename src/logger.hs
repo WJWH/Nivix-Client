@@ -19,8 +19,9 @@ main = withGPIO . withSPI $ do --setup some things
     setDataModeSPI (False,False)
     waitForConnection --wacht tot de wifi- dan wel de 3G-verbinding werkt
     battery <- readBattery
-    temperature <- readRaw
-    shouldStayAlive <- postToNivix $ STUW battery temperature
+    temperature <- readTemperature
+    sensorLevel <- readRaw
+    shouldStayAlive <- postToNivix $ STUW battery temperature sensorLevel
     if shouldStayAlive then return () else shutdown
 
 --Posts een request naar Nivix
@@ -44,6 +45,6 @@ shutdown = do
     if preventShutdown then return () else (writePin Pin15 False >> (createProcess $ shell "sudo shutdown -h now") >> return ())
 
 --aeson werkt niet op de pi omdat je geen TH kan gebruiken. dit is natuurlijk een nogal brakke vervanger, maar je moet wat...
-encode (STUW bat temp) = BSL.pack . show $ [bat,temp]
+encode (STUW bat temp sensor) = BSL.pack . show $ [bat,temp,sensor]
 
-data Event = STUW Double Double
+data Event = STUW Double Double Double
