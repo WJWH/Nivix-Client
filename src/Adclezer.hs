@@ -28,6 +28,7 @@ readBattery = do
     return . (myRound 2) . average . (map extractBatteryResults) $ results
 
 readRaw :: IO Double -- leest direct de spanning en rondt die af zodat je serverside er iets mee kan doen
+readRaw = do
     results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,160,0]) -- 160 = 128 + 32 = 128 + (pin 2 << 4)
     return . (myRound 2) . average $ results
 
