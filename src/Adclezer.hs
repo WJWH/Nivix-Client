@@ -30,7 +30,7 @@ readBattery = do
 readRaw :: IO Double -- leest direct de spanning en rondt die af zodat je serverside er iets mee kan doen
 readRaw = do
     results <- replicateM 5 (threadDelay 10000 >> transferManySPI [1,160,0]) -- 160 = 128 + 32 = 128 + (pin 2 << 4)
-    return . (myRound 2) . average $ results
+    return . (myRound 2) . average . (map extractRaw) $ results
 
 --de spanning van de batterij ligt ergens tussen drie en 4.2V?
 --de reference spanning van de ADC is maar 3.3V, dus een spanningsdeler van 2 10kOhm weerstanden haalt de spanning ver genoeg naar beneden om goed te meten.
@@ -51,6 +51,12 @@ extractTemperatureResults [_,p,q] = t - 273.15 -- terugrekenen van Kelvin naar C
             r0 = 10000  -- 10 kOhm, nominale weerstand van de thermistor bij 25 graden C
             b = 3950    -- coefficient van de thermistor
 extractTemperatureResults _ = error "extractTemperatureResults kreeg een inputlijst die niet uit drie elementen bestond."
+
+-- The result from transferManySPI is a [GHC.Word.Word8]; the first byte is meaningless, as asre the first
+-- five bytes of the second byte. The rest are an eleven bit number describing the result value.
+-- See also page 21 of the MCP3008 datasheet
+extractRaw :: (Bits a, Integral a) => [a] -> Double
+extractRaw [_,p,q] = ((fromIntegral (p .&. 0x3)) * 256) + (fromIntegral q)
 
 myRound :: Integer -> Double -> Double
 myRound places n = (fromIntegral $ round (n * factor)) / factor
